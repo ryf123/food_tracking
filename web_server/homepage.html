@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Voice Recorder</title>
+</head>
+<body>
+  <button id="startButton">Start Recording</button>
+  <button id="stopButton" disabled>Stop Recording</button>
+  <button id="saveButton" disabled>Save Recording</button>
+  <audio id="audioPreview" controls></audio>
+  <script>
+    let mediaRecorder;
+    let recordedChunks = [];
+
+    const startRecording = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.addEventListener('dataavailable', handleDataAvailable);
+        mediaRecorder.start();
+        recordedChunks = []; // Clear the previous recording chunks
+        document.getElementById('startButton').disabled = true;
+        document.getElementById('stopButton').disabled = false;
+        document.getElementById('saveButton').disabled = true;
+        document.getElementById('audioPreview').src = '';
+      } catch (error) {
+        console.error('Error accessing microphone:', error);
+      }
+    };
+
+    const stopRecording = () => {
+      mediaRecorder.stop();
+      mediaRecorder.stream.getTracks().forEach(track => track.stop());
+      document.getElementById('startButton').disabled = false;
+      document.getElementById('stopButton').disabled = true;
+      document.getElementById('saveButton').disabled = false;
+    };
+
+    const handleDataAvailable = (event) => {
+      recordedChunks.push(event.data);
+    };
+
+    const saveRecording = () => {
+      const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+      const url = URL.createObjectURL(blob);
+      document.getElementById('audioPreview').src = url;
+      document.getElementById('audioPreview').controls = true;
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'recorded_audio.webm';
+      link.click();
+    };
+
+    document.getElementById('startButton').addEventListener('click', startRecording);
+    document.getElementById('stopButton').addEventListener('click', stopRecording);
+    document.getElementById('saveButton').addEventListener('click', saveRecording);
+  </script>
+</body>
+</html>
