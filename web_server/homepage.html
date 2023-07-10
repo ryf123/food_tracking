@@ -9,6 +9,7 @@
   <button id="stopButton" disabled>Stop Recording</button>
   <button id="saveButton" disabled>Save Recording</button>
   <audio id="audioPreview" controls></audio>
+  <button id="transcribe">Transcribe</button>
   <script>
     let mediaRecorder;
     let recordedChunks = [];
@@ -41,6 +42,10 @@
       recordedChunks.push(event.data);
     };
 
+    const transcribe = () => {
+      fetch('/transcribe');
+    };
+
     const saveRecording = () => {
       const blob = new Blob(recordedChunks, { type: 'audio/webm' });
       const url = URL.createObjectURL(blob);
@@ -55,6 +60,7 @@
     document.getElementById('startButton').addEventListener('click', startRecording);
     document.getElementById('stopButton').addEventListener('click', stopRecording);
     document.getElementById('saveButton').addEventListener('click', saveRecording);
+    document.getElementById('transcribe').addEventListener('click', transcribe);
   </script>
 </body>
 </html>
