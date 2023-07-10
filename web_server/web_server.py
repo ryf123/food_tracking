@@ -23,12 +23,15 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
             with open('homepage.html', 'r') as f:
                 self.wfile.write(bytes(f.read(), encoding='utf-8'))
         elif self.path == "/transcribe":
+            self.send_response(200)
             openai.api_key = os.getenv("OPENAI_API_KEY")
             text = self.transcribe()
             print(text)
             calories = self.completion(text)
             print(calories)
-            self.wfile.write(bytes(json.dumps(calories), 'utf-8'))
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(bytes(json.dumps({'calories': calories}), 'utf-8'))
         else:
             super().do_GET()
 
