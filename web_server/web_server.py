@@ -3,6 +3,10 @@ import socketserver
 import os
 import openai
 import json
+from langchain.llms import OpenAI
+from langchain.chains import LLMChain
+from langchain.prompts import PromptTemplate
+from langchain.chains import SimpleSequentialChain
 
 # Define the port number for the server to listen on
 PORT = 8000
@@ -25,9 +29,10 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
         elif self.path == "/transcribe":
             self.send_response(200)
             openai.api_key = os.getenv("OPENAI_API_KEY")
+
             text = self.transcribe()
             print(text)
-            calories = self.completion(text)
+            calories = self.summarize_calorie_intake(text)
             print(calories)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
@@ -42,6 +47,23 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
             return transcript.text
         except Exception as e:
             print("An error occurred:", str(e))
+
+    def summarize_calorie_intake(self, text):
+        llm = OpenAI(temperature=0)
+        translate_template = """Translate the text to English: {text} """
+        translate_prompt_template = PromptTemplate(input_variables=["text"], template=translate_template)
+        translate_chain = LLMChain(llm=llm, prompt=translate_prompt_template)
+
+        estimate_calorie_template = """Estimate the calorie for each item, and put them in a table with format, |food_name|amount|estimate calorie|: {translated_text} """
+        estimate_calorie_prompt_template = PromptTemplate(input_variables=["translated_text"], template=estimate_calorie_template)
+        estimate_calorie_chain = LLMChain(llm=llm, prompt=estimate_calorie_prompt_template)
+
+        total_calorie_chain_tempate = """Sum the estimated total calorie taken in the table: {table}"""
+        total_calorie_prompt_template = PromptTemplate(input_variables=["table"], template=total_calorie_chain_tempate)
+        total_calorie_chain = LLMChain(llm=llm, prompt=total_calorie_prompt_template)
+
+        overall_chain = SimpleSequentialChain(chains=[translate_chain, estimate_calorie_chain, total_calorie_chain], verbose=True)
+        return overall_chain.run(text).strip('\n')
 
     def completion(self, prompt):
       try:
