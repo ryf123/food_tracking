@@ -38,7 +38,7 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
     def transcribe(self):
         try:
             audio_file= open("/Users/yifei/Downloads/recorded_audio.webm", "rb")
-            transcript = openai.Audio.transcribe("whisper-1", audio_file)
+            transcript = openai.Audio.transcribe("whisper-1", audio_file, prompt="The input is related to food consumed on a specific day")
             return transcript.text
         except Exception as e:
             print("An error occurred:", str(e))
