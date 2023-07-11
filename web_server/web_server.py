@@ -6,7 +6,7 @@ import json
 from langchain.llms import OpenAI
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
-from langchain.chains import SimpleSequentialChain
+from langchain.chains import SequentialChain
 
 # Define the port number for the server to listen on
 PORT = 8000
@@ -52,18 +52,20 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
         llm = OpenAI(temperature=0)
         translate_template = """Translate the text to English: {text} """
         translate_prompt_template = PromptTemplate(input_variables=["text"], template=translate_template)
-        translate_chain = LLMChain(llm=llm, prompt=translate_prompt_template)
+        translate_chain = LLMChain(llm=llm, prompt=translate_prompt_template, output_key="translated_text")
 
         estimate_calorie_template = """Estimate the calorie for each item, and put them in a table with format, |food_name|amount|estimate calorie|: {translated_text} """
         estimate_calorie_prompt_template = PromptTemplate(input_variables=["translated_text"], template=estimate_calorie_template)
-        estimate_calorie_chain = LLMChain(llm=llm, prompt=estimate_calorie_prompt_template)
+        estimate_calorie_chain = LLMChain(llm=llm, prompt=estimate_calorie_prompt_template, output_key="table")
 
         total_calorie_chain_tempate = """Sum the estimated total calorie taken in the table: {table}"""
         total_calorie_prompt_template = PromptTemplate(input_variables=["table"], template=total_calorie_chain_tempate)
-        total_calorie_chain = LLMChain(llm=llm, prompt=total_calorie_prompt_template)
+        total_calorie_chain = LLMChain(llm=llm, prompt=total_calorie_prompt_template, output_key="total_calorie")
 
-        overall_chain = SimpleSequentialChain(chains=[translate_chain, estimate_calorie_chain, total_calorie_chain], verbose=True)
-        return overall_chain.run(text).strip('\n')
+        overall_chain = SequentialChain(chains=[translate_chain, estimate_calorie_chain, total_calorie_chain], input_variables=["text"], output_variables=["translated_text", "table", "total_calorie"], verbose=True)
+        result = overall_chain({'text': text})
+        print(result)
+        return result
 
     def completion(self, prompt):
       try:
