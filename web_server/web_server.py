@@ -7,7 +7,8 @@ from langchain.llms import OpenAI
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain.chains import SequentialChain
-
+from sqlite_db import SQLiteDB
+from db_access import DBAccess
 # Define the port number for the server to listen on
 PORT = 8000
 
@@ -19,6 +20,8 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
 
     # Override the do_GET() method to customize the homepage
     def do_GET(self):
+        print(f"[do_GET]Entering path {self.path}\n")
+
         if self.path == "/":
             # Customize the content for the homepage
             self.send_response(200)
@@ -36,7 +39,20 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
             print(calories)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            self.wfile.write(bytes(json.dumps({'calories': calories}), 'utf-8'))
+            self.wfile.write(bytes(json.dumps(calories), 'utf-8'))
+
+        elif self.path.startswith("/db_save"):
+            import urllib.parse
+            parsed_url = urllib.parse.urlparse(self.path)
+            query_params = urllib.parse.parse_qs(parsed_url.query)
+            print(query_params.get('text', [''])[0])
+
+            db_access = DBAccess()
+            db_access.insert_to_db(200, query_params.get('text', [''])[0])
+            self.send_response(200)
+            self.send_header('Content-type', 'text/plain')  # Add the Content-type header
+            self.end_headers()
+
         else:
             super().do_GET()
 

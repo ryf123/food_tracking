@@ -10,9 +10,11 @@
   <button id="saveButton" disabled>Save Recording</button>
   <audio id="audioPreview" controls></audio>
   <button id="transcribe">Transcribe</button>
+  <button id="saveLog">Save Log</button>
   <script>
     let mediaRecorder;
     let recordedChunks = [];
+    let transcribed_text = '';
 
     const startRecording = async () => {
       try {
@@ -53,6 +55,23 @@
       .then(data => {
         // Handle the data returned by the API
         console.log(data);
+        transcribed_text = data;
+      })
+      .catch(error => {
+        // Handle any errors that occurred during the request
+        console.error('Error:', error);
+      });
+    };
+
+    const saveLog = () => {
+      const queryParams = new URLSearchParams();
+      queryParams.append("text", JSON.stringify(transcribed_text));
+
+      fetch('/db_save'+ "?" + queryParams.toString())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
       })
       .catch(error => {
         // Handle any errors that occurred during the request
@@ -75,6 +94,7 @@
     document.getElementById('stopButton').addEventListener('click', stopRecording);
     document.getElementById('saveButton').addEventListener('click', saveRecording);
     document.getElementById('transcribe').addEventListener('click', transcribe);
+    document.getElementById('saveLog').addEventListener('click', saveLog);
   </script>
 </body>
 </html>
