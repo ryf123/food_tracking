@@ -2,6 +2,7 @@ import http.server
 import socketserver
 import json
 from db_access import DBAccess
+import re
 from transcribe_service import TranscribeService
 # Define the port number for the server to listen on
 PORT = 8000
@@ -11,6 +12,30 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
     # Override the log_message() method to suppress log messages
     def log_message(self, format, *args):
         return
+
+    def do_POST(self):
+        if self.path == "/transcribe":
+            content_length = int(self.headers["Content-Length"])
+            file_data = self.rfile.read(content_length)
+            # Extract the file content from the file data
+            file_content = re.search(rb'\r\n\r\n([\s\S]*)\r\n', file_data).group(1)
+            file_name = 'tmp.webm'
+            # [TODO] the file needs to be saved first, then read again before send it to whisper, not sure why
+            with open(file_name, "wb") as f:
+                f.write(file_content)
+
+            ts = TranscribeService()
+            text = ts.transcribe_audio_file(file_name)
+
+            print(text)
+            calories = ts.summarize_calorie_intake(text)
+            print(calories)
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(bytes(json.dumps(calories), 'utf-8'))
+        else:
+            super.do_POST()
 
     # Override the do_GET() method to customize the homepage
     def do_GET(self):
@@ -23,16 +48,6 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             with open('homepage.html', 'r') as f:
                 self.wfile.write(bytes(f.read(), encoding='utf-8'))
-        elif self.path == "/transcribe":
-            self.send_response(200)
-            ts = TranscribeService()
-            text = ts.transcribe_audio()
-            print(text)
-            calories = ts.summarize_calorie_intake(text)
-            print(calories)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(bytes(json.dumps(calories), 'utf-8'))
 
         elif self.path.startswith("/db_save"):
             import urllib.parse

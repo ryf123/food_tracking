@@ -27,11 +27,20 @@ class TranscribeService:
 		print(result)
 		return result
 
-	def transcribe_audio(self):
+	def transcribe_audio(self, audio_content):
 		# Transcribe the audio using OpenAI Whisper API
 		# Replace this with your actual transcription logic
 		try:
-			audio_file= open("/Users/yifei/Downloads/recorded_audio.webm", "rb")
+			transcript = openai.Audio.transcribe("whisper-1", audio_content, prompt="The input is related to food consumed on a specific day")
+			return transcript.text
+		except Exception as e:
+			print("An error occurred:", str(e))
+
+	def transcribe_audio_file(self, file_name):
+		# Transcribe the audio using OpenAI Whisper API
+		# Replace this with your actual transcription logic
+		try:
+			audio_file= open(file_name, "rb")
 			transcript = openai.Audio.transcribe("whisper-1", audio_file, prompt="The input is related to food consumed on a specific day")
 			return transcript.text
 		except Exception as e:

@@ -3,18 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <title>Voice Recorder</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <h1>Voice Recorder</h1>
   <button id="startButton">Start Recording</button>
   <button id="stopButton" disabled>Stop Recording</button>
   <button id="saveButton" disabled>Save Recording</button>
-  <audio id="audioPreview" controls></audio>
   <button id="transcribe">Transcribe</button>
   <button id="saveLog">Save Log</button>
+  <audio id="audioPreview" controls></audio>
+  <!-- New element to display fetched data -->
+  <div id="transcribedText"></div>
   <script>
     let mediaRecorder;
     let recordedChunks = [];
-    let transcribed_text = '';
+    let transcribed_texts = [];
 
     const startRecording = async () => {
       try {
@@ -45,7 +49,18 @@
     };
 
     const transcribe = () => {
-      fetch('/transcribe')
+      if(recordedChunks.length == 0){
+        return;
+      }
+
+      const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+      const formData = new FormData();
+      formData.append('audio', blob, 'recorded_audio.webm');
+
+      fetch('/transcribe', {
+        method: 'POST',
+        body: formData
+      })
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -55,7 +70,9 @@
       .then(data => {
         // Handle the data returned by the API
         console.log(data);
-        transcribed_text = data;
+        transcribed_texts.push(JSON.stringify(data));
+        // Update the content of the transcribedText element
+        document.getElementById('transcribedText').textContent = transcribed_texts;
       })
       .catch(error => {
         // Handle any errors that occurred during the request
