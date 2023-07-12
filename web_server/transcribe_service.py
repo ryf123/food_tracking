@@ -45,4 +45,3 @@ class TranscribeService:
 			return transcript.text
 		except Exception as e:
 			print("An error occurred:", str(e))
-			return '''{'text': '今天早上我吃了一碗粥,一个粽子 中午吃了一碗米饭,一些红烧肉和一些蔬菜 晚上吃了一碗米饭,几块烤鸭 一些红烧肉和一些蔬菜 还吃了两个小橘子,两个小的无花果', 'translated_text': '\n\nThis morning I had a bowl of porridge and a zongzi. For lunch I had a bowl of rice, some braised pork and some vegetables. For dinner I had a bowl of rice, a few pieces of roast duck, some braised pork and some vegetables. I also had two small oranges and two small figs.', 'table': '\n\n|Food Name|Amount|Estimate Calorie|\n|---|---|---|\n|Porridge|1 bowl|200 kcal|\n|Zongzi|1|200 kcal|\n|Rice|2 bowls|400 kcal|\n|Braised Pork|2 servings|400 kcal|\n|Vegetables|2 servings|100 kcal|\n|Roast Duck|2 pieces|200 kcal|\n|Oranges|2 small|80 kcal|\n|Figs|2 small|80 kcal|', 'total_calorie': '\n\n1,360 kcal'}'''

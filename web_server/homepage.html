@@ -14,7 +14,7 @@
   <button id="saveLog">Save Log</button>
   <audio id="audioPreview" controls></audio>
   <!-- New element to display fetched data -->
-  <div id="transcribedText"></div>
+  <div id="table-container"></div>
   <script>
     let mediaRecorder;
     let recordedChunks = [];
@@ -70,9 +70,10 @@
       .then(data => {
         // Handle the data returned by the API
         console.log(data);
-        transcribed_texts.push(JSON.stringify(data));
+        transcribed_texts.push(JSON.parse(JSON.stringify(data)));
         // Update the content of the transcribedText element
-        document.getElementById('transcribedText').textContent = transcribed_texts;
+        // document.getElementById('transcribedText').textContent = transcribed_texts;
+        updateTable(transcribed_texts);
       })
       .catch(error => {
         // Handle any errors that occurred during the request
@@ -106,6 +107,27 @@
       link.download = 'recorded_audio.webm';
       link.click();
     };
+
+    const updateTable = (arrayData) => {
+        // Convert the array to a table
+        var tableHtml = '<table>';
+        tableHtml += '<thead><tr><th>Transcribed Text</th><th>Calories</th></thead>';
+        tableHtml += '<tbody>';
+
+        for (var i = 0; i < arrayData.length; i++) {
+            tableHtml += '<tr>';
+            tableHtml += '<td>' + arrayData[i]['text'] + '</td>';
+            tableHtml += '<td>' + arrayData[i]['total_calorie'] + '</td>';
+            tableHtml += '</tr>';
+        }
+
+        tableHtml += '</tbody>';
+        tableHtml += '</table>';
+
+        // Display the table on the page
+        var tableContainer = document.getElementById('table-container');
+        tableContainer.innerHTML = tableHtml;
+    }
 
     document.getElementById('startButton').addEventListener('click', startRecording);
     document.getElementById('stopButton').addEventListener('click', stopRecording);
