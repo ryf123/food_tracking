@@ -1,6 +1,6 @@
 let mediaRecorder;
 let recordedChunks = [];
-let transcribed_texts = [{'text':'今天我吃了一个包子', 'total_calorie': 200}, {'text':'今天我吃了一个饺子', 'total_calorie': 100}];
+let transcribed_texts = [{'text':'早上吃了三个小笼包，一碗燕麦粥', 'total_calorie': 200}, {'text':'中午吃了一块带鱼，一碗米饭，40粒油炸花生，半盘炒白菜', 'total_calorie': 100}];
 
 const startRecording = async () => {
   try {
@@ -54,7 +54,7 @@ const transcribe = () => {
     console.log(data);
     transcribed_texts.push(JSON.parse(JSON.stringify(data)));
     // Update the content of the transcribedText element
-    updateTable(transcribed_texts);
+    updateTable();
   })
   .catch(error => {
     // Handle any errors that occurred during the request
@@ -89,19 +89,19 @@ const saveRecording = () => {
   link.click();
 };
 
-const updateTable = (arrayData) => {
+const updateTable = () => {
     // Convert the array to a table
     var tableHtml = '<table id="selectableTable">';
     tableHtml += '<thead><tr><th>#</th><th>Transcribed Text</th><th>Calories</th></thead>';
     tableHtml += '<tbody>';
     var total_calorie = 0;
-    for (var i = 0; i < arrayData.length; i++) {
+    for (var i = 0; i < transcribed_texts.length; i++) {
         tableHtml += '<tr>';
         tableHtml += '<td>' + (i+1) + '</td>';
-        tableHtml += '<td contentEditable="true">' + arrayData[i]['text'] + '</td>';
-        tableHtml += '<td>' + arrayData[i]['total_calorie'] + '</td>';
+        tableHtml += '<td contentEditable="true">' + transcribed_texts[i]['text'] + '</td>';
+        tableHtml += '<td>' + transcribed_texts[i]['total_calorie'] + '</td>';
         tableHtml += '</tr>';
-        total_calorie += arrayData[i]['total_calorie'];
+        total_calorie += transcribed_texts[i]['total_calorie'];
     }
     tableHtml += '<tr><td>#</td><td>Total Calorie</td><td>' + total_calorie + '</td></tr>';
     tableHtml += '</tbody>';
@@ -125,10 +125,8 @@ const updateTable = (arrayData) => {
             this.classList.add('selected');
         });
     }
-}
-updateTable(transcribed_texts);
-var removeButton = document.getElementById('RemoveButton');
-removeButton.addEventListener('click', function() {
+};
+const remove = () => {
     var table = document.getElementById('selectableTable');
     var selectedRow = table.querySelector('tr.selected');
     if (selectedRow) {
@@ -139,9 +137,9 @@ removeButton.addEventListener('click', function() {
     } else {
         console.log('No row selected.');
     }
-});
-var calculateButtonButton = document.getElementById('CalculateButton');
-calculateButtonButton.addEventListener('click', function() {
+};
+
+const calculate = () => {
     var table = document.getElementById('selectableTable');
     var selectedRow = table.querySelector('tr.selected');
     if (selectedRow) {
@@ -159,8 +157,11 @@ calculateButtonButton.addEventListener('click', function() {
         .then(data => {
           // Handle the response data
           console.log(data);
+          total_calorie = JSON.parse(JSON.stringify(data))['total_calorie'];
           const cells = selectedRow.cells;
-          cells[1].innerHTML = JSON.parse(JSON.stringify(data))['total_calorie'];
+          transcribed_texts[parseInt(cells[0].innerText) - 1]['total_calorie'] = total_calorie;
+          cells[2].innerHTML = total_calorie;
+          updateTable();
         })
         .catch(error => {
           // Handle any errors
@@ -169,10 +170,13 @@ calculateButtonButton.addEventListener('click', function() {
     } else {
         console.log('No row selected.');
     }
-});
+};
 
+updateTable();
 document.getElementById('startButton').addEventListener('click', startRecording);
 document.getElementById('stopButton').addEventListener('click', stopRecording);
 document.getElementById('saveButton').addEventListener('click', saveRecording);
 document.getElementById('transcribe').addEventListener('click', transcribe);
 document.getElementById('saveLog').addEventListener('click', saveLog);
+document.getElementById('calculateButton').addEventListener('click', calculate);
+document.getElementById('removeButton').addEventListener('click', remove);

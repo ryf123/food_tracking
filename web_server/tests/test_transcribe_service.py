@@ -10,7 +10,7 @@ class TranscribeServiceTestCase(unittest.TestCase):
 
     def test_summarize_calorie_intake(self):
         text = "I ate 100 calories bread"
-        expected_result = {'total_calorie': '100'}
+        expected_result = {'total_calorie': 100}
 
         # Mock the SequentialChain and its output
         with patch('transcribe_service.SequentialChain') as mock_sequential_chain:
@@ -39,6 +39,21 @@ class TranscribeServiceTestCase(unittest.TestCase):
 
             # Assert the result
             self.assertEqual(result, expected_result)
+
+    def test_process_transcribed_result(self):
+        result = {
+            'text': 'I ate an apple',
+            'total_calorie': '1,360 kcal'
+        }
+
+        expected_result = {
+            'total_calorie': 1360,
+            'text': 'I ate an apple'
+        }
+
+        processed_result = self.transcribe_service.process_transcribed_result(result)
+
+        self.assertEqual(processed_result, expected_result)
 
 if __name__ == '__main__':
     unittest.main()

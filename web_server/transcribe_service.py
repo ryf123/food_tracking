@@ -1,5 +1,6 @@
 import os
 import openai
+import re
 from langchain.llms import OpenAI
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
@@ -24,7 +25,13 @@ class TranscribeService:
 
 		overall_chain = SequentialChain(chains=[estimate_calorie_chain, total_calorie_chain], input_variables=["text"], output_variables=["table", "total_calorie"], verbose=True)
 		result = overall_chain({'text': text})
-		print(result)
+		processed_result = self.process_transcribed_result(result)
+		print(processed_result)
+		return processed_result
+
+	def process_transcribed_result(self, result):
+		# convert 1,360 kcal to 1360
+		result['total_calorie'] = int(re.sub(r"\D", "", result['total_calorie']))
 		return result
 
 	def transcribe_audio(self, audio_content):
