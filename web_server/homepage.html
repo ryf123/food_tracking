@@ -73,7 +73,6 @@
         console.log(data);
         transcribed_texts.push(JSON.parse(JSON.stringify(data)));
         // Update the content of the transcribedText element
-        // document.getElementById('transcribedText').textContent = transcribed_texts;
         updateTable(transcribed_texts);
       })
       .catch(error => {
@@ -166,6 +165,8 @@
             .then(data => {
               // Handle the response data
               console.log(data);
+              const cells = selectedRow.cells;
+              cells[1].innerHTML = JSON.parse(JSON.stringify(data))['total_calorie'];
             })
             .catch(error => {
               // Handle any errors
