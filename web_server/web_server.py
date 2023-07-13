@@ -14,6 +14,7 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
         return
 
     def do_POST(self):
+        print(f"[do_Post]Entering path {self.path}\n")
         if self.path == "/transcribe":
             content_length = int(self.headers["Content-Length"])
             file_data = self.rfile.read(content_length)

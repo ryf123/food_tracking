@@ -10,19 +10,19 @@ class TranscribeService:
 
 	def summarize_calorie_intake(self, text):
 		llm = OpenAI(temperature=0)
-		translate_template = """Translate the text to English: {text} """
-		translate_prompt_template = PromptTemplate(input_variables=["text"], template=translate_template)
-		translate_chain = LLMChain(llm=llm, prompt=translate_prompt_template, output_key="translated_text")
+		# translate_template = """Translate the text to English: {text} """
+		# translate_prompt_template = PromptTemplate(input_variables=["text"], template=translate_template)
+		# translate_chain = LLMChain(llm=llm, prompt=translate_prompt_template, output_key="translated_text")
 
-		estimate_calorie_template = """Estimate the calorie for each item, and put them in a table with format, |food_name|amount|estimate calorie|: {translated_text} """
-		estimate_calorie_prompt_template = PromptTemplate(input_variables=["translated_text"], template=estimate_calorie_template)
+		estimate_calorie_template = """Estimate the calorie for each item, and put them in a table with format, |food_name|amount|estimate calorie|: {text} """
+		estimate_calorie_prompt_template = PromptTemplate(input_variables=["text"], template=estimate_calorie_template)
 		estimate_calorie_chain = LLMChain(llm=llm, prompt=estimate_calorie_prompt_template, output_key="table")
 
-		total_calorie_chain_tempate = """Sum the estimated total calorie taken in the table: {table}"""
+		total_calorie_chain_tempate = """Given table: {table}, sum the number in 'estimate calorie' column and return the result only in digits, do not multiply column amount and estimate calorie"""
 		total_calorie_prompt_template = PromptTemplate(input_variables=["table"], template=total_calorie_chain_tempate)
 		total_calorie_chain = LLMChain(llm=llm, prompt=total_calorie_prompt_template, output_key="total_calorie")
 
-		overall_chain = SequentialChain(chains=[translate_chain, estimate_calorie_chain, total_calorie_chain], input_variables=["text"], output_variables=["translated_text", "table", "total_calorie"], verbose=True)
+		overall_chain = SequentialChain(chains=[estimate_calorie_chain, total_calorie_chain], input_variables=["text"], output_variables=["table", "total_calorie"], verbose=True)
 		result = overall_chain({'text': text})
 		print(result)
 		return result
