@@ -23,13 +23,29 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
             # [TODO] the file needs to be saved first, then read again before send it to whisper, not sure why
             with open(file_name, "wb") as f:
                 f.write(file_content)
-
             ts = TranscribeService()
             text = ts.transcribe_audio_file(file_name)
-
             print(text)
-            calories = ts.summarize_calorie_intake(text)
+
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(bytes(json.dumps(calories), 'utf-8'))
+        elif self.path == "/calculate_calorie":
+            # Get the content length from the headers
+            content_length = int(self.headers['Content-Length'])
+
+            # Read the request body
+            request_body = self.rfile.read(content_length)
+
+            # Parse the JSON data from the request body
+            data = json.loads(request_body)
+            # Process the data as needed
+            ts = TranscribeService()
+            print(data)
+            calories = ts.summarize_calorie_intake(data['transcribed_text'])
             print(calories)
+            # Send the response
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()

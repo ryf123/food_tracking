@@ -15,10 +15,11 @@
   <audio id="audioPreview" controls></audio>
   <!-- New element to display fetched data -->
   <div id="table-container"></div>
+  <button id="getSelectedRowButton">Caculate Calorie for the selected row</button>
   <script>
     let mediaRecorder;
     let recordedChunks = [];
-    let transcribed_texts = [];
+    let transcribed_texts = [{'text':'今天我吃了一个包子', 'total_calorie': 200}, {'text':'今天我吃了一个饺子', 'total_calorie': 100}];
 
     const startRecording = async () => {
       try {
@@ -110,13 +111,13 @@
 
     const updateTable = (arrayData) => {
         // Convert the array to a table
-        var tableHtml = '<table>';
+        var tableHtml = '<table id="selectableTable">';
         tableHtml += '<thead><tr><th>Transcribed Text</th><th>Calories</th></thead>';
         tableHtml += '<tbody>';
 
         for (var i = 0; i < arrayData.length; i++) {
             tableHtml += '<tr>';
-            tableHtml += '<td>' + arrayData[i]['text'] + '</td>';
+            tableHtml += '<td contentEditable="true">' + arrayData[i]['text'] + '</td>';
             tableHtml += '<td>' + arrayData[i]['total_calorie'] + '</td>';
             tableHtml += '</tr>';
         }
@@ -127,7 +128,53 @@
         // Display the table on the page
         var tableContainer = document.getElementById('table-container');
         tableContainer.innerHTML = tableHtml;
+
+        var table = document.getElementById('selectableTable');
+        var rows = table.getElementsByTagName('tr');
+
+        for (var i = 0; i < rows.length; i++) {
+            rows[i].addEventListener('click', function() {
+                // Deselect all other rows
+                for (var j = 0; j < rows.length; j++) {
+                    rows[j].classList.remove('selected');
+                }
+
+                // Select the clicked row
+                this.classList.add('selected');
+            });
+        }
     }
+    updateTable(transcribed_texts);
+
+    var getSelectedRowButton = document.getElementById('getSelectedRowButton');
+    getSelectedRowButton.addEventListener('click', function() {
+        var table = document.getElementById('selectableTable');
+        var selectedRow = table.querySelector('tr.selected');
+        if (selectedRow) {
+            var rowData = Array.from(selectedRow.cells).map(cell => cell.textContent);
+            console.log(rowData[0]);
+
+            var requestOptions = {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json' // Set the appropriate content type
+              },
+              body: JSON.stringify({'transcribed_text': rowData[0]}) // Convert the parameters to a JSON string
+            };
+            fetch('/calculate_calorie', requestOptions)
+            .then(response => response.json())
+            .then(data => {
+              // Handle the response data
+              console.log(data);
+            })
+            .catch(error => {
+              // Handle any errors
+              console.error('Error:', error);
+            });
+        } else {
+            console.log('No row selected.');
+        }
+    });
 
     document.getElementById('startButton').addEventListener('click', startRecording);
     document.getElementById('stopButton').addEventListener('click', stopRecording);
