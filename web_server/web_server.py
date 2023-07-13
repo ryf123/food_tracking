@@ -30,7 +30,7 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            self.wfile.write(bytes(json.dumps(calories), 'utf-8'))
+            self.wfile.write(bytes(json.dumps({'text': text}), 'utf-8'))
         elif self.path == "/calculate_calorie":
             # Get the content length from the headers
             content_length = int(self.headers['Content-Length'])
