@@ -11,9 +11,6 @@ class TranscribeService:
 
 	def summarize_calorie_intake(self, text):
 		llm = OpenAI(temperature=0)
-		# translate_template = """Translate the text to English: {text} """
-		# translate_prompt_template = PromptTemplate(input_variables=["text"], template=translate_template)
-		# translate_chain = LLMChain(llm=llm, prompt=translate_prompt_template, output_key="translated_text")
 
 		estimate_calorie_template = """Estimate the calorie for each item, and put them in a table with format, |food_name|amount|estimate calorie|: {text} """
 		estimate_calorie_prompt_template = PromptTemplate(input_variables=["text"], template=estimate_calorie_template)
