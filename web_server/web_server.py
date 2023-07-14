@@ -73,7 +73,7 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
             print(query_params.get('text', [''])[0])
 
             db_access = DBAccess()
-            db_access.insert_to_db(200, query_params.get('text', [''])[0])
+            db_access.insert_to_db(200, json.loads(query_params.get('text', [''])[0]))
             self.send_response(200)
             self.send_header('Content-type', 'text/plain')  # Add the Content-type header
             self.end_headers()

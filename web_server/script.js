@@ -64,7 +64,7 @@ const transcribe = () => {
 
 const saveLog = () => {
   const queryParams = new URLSearchParams();
-  queryParams.append("text", JSON.stringify(transcribed_text));
+  queryParams.append("text", JSON.stringify(transcribed_texts));
 
   fetch('/db_save'+ "?" + queryParams.toString())
   .then(response => {
