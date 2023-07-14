@@ -31,7 +31,25 @@ class DBAccessTestCase(unittest.TestCase):
         ]
         
         # Check each call separately
-        self.mock_db.insert.assert_has_calls(expected_calls)
+        self.mock_db.assert_has_calls(expected_calls)
+
+    def test_get_items(self):
+        # Mock data
+        user_id = '123'
+
+        # Mock the return value of get_items() method
+        mock_results = [('2023-07-13', 1310)]
+        self.mock_db.get_items.return_value = mock_results
+
+        # Call the method to be tested
+        result = self.db_access.get_calorie(user_id)
+
+        # Assert the result
+        expected_result = [{'date': '2023-07-13', 'calorie': 1310}]
+        self.assertEqual(result, expected_result)
+
+        # Assert that the get_items method of the mock database was called with the correct argument
+        self.mock_db.get_items.assert_called_once_with(user_id=123)
 
     def tearDown(self):
         # Clean up resources after each test

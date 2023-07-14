@@ -3,6 +3,7 @@ import socketserver
 import json
 from db_access import DBAccess
 import re
+import urllib.parse
 from transcribe_service import TranscribeService
 # Define the port number for the server to listen on
 PORT = 8000
@@ -57,6 +58,8 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
     # Override the do_GET() method to customize the homepage
     def do_GET(self):
         print(f"[do_GET]Entering path {self.path}\n")
+        parsed_url = urllib.parse.urlparse(self.path)
+        query_params = urllib.parse.parse_qs(parsed_url.query)
 
         if self.path == "/":
             # Customize the content for the homepage
@@ -66,10 +69,15 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
             with open('homepage.html', 'r') as f:
                 self.wfile.write(bytes(f.read(), encoding='utf-8'))
 
+        elif self.path == "/dashboard":
+            # Customize the content for the homepage
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+            with open('dashboard.html', 'r') as f:
+                self.wfile.write(bytes(f.read(), encoding='utf-8'))
+
         elif self.path.startswith("/db_save"):
-            import urllib.parse
-            parsed_url = urllib.parse.urlparse(self.path)
-            query_params = urllib.parse.parse_qs(parsed_url.query)
             print(query_params.get('text', [''])[0])
 
             db_access = DBAccess()
@@ -78,6 +86,17 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-type', 'text/plain')  # Add the Content-type header
             self.end_headers()
 
+        elif self.path.startswith("/load_history"):
+            self.send_response(200)
+            user_id = query_params.get('user_id', [''])[0]
+            print(f'user id: {user_id}')
+            db_access = DBAccess()
+            calorie_data = db_access.get_calorie(user_id)
+            self.send_header('Content-type', 'application/text')  # Add the Content-type header
+            self.end_headers()
+            print(calorie_data)
+            self.wfile.write(bytes(json.dumps(calorie_data), 'utf-8'))
+            
         else:
             super().do_GET()
 

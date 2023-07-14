@@ -33,8 +33,10 @@ class SQLiteDB:
         self.cursor.execute(f"INSERT INTO {self.TABLE_NAME} (user_id, transcribed_text, translated_text, calories, food_table, timestamp, date, time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (user_id, transcribed_text, translated_text, calories, food_table, timestamp, date, time))
         self.conn.commit()
 
-    def get_items(self):
-        self.cursor.execute(f"SELECT * FROM {self.TABLE_NAME}")
+    def get_items(self, user_id):
+        query = f"SELECT date, sum(calories) FROM {self.TABLE_NAME} where user_id = {user_id} group by date order by date DESC"
+        print(query)
+        self.cursor.execute(query)
         return self.cursor.fetchall()
 
     def close(self):
