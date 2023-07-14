@@ -160,6 +160,7 @@ const calculate = () => {
           total_calorie = JSON.parse(JSON.stringify(data))['total_calorie'];
           const cells = selectedRow.cells;
           transcribed_texts[parseInt(cells[0].innerText) - 1]['total_calorie'] = total_calorie;
+          transcribed_texts[parseInt(cells[0].innerText) - 1]['text'] = rowData[1];
           cells[2].innerHTML = total_calorie;
           updateTable();
         })
