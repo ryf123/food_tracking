@@ -134,6 +134,7 @@ const remove = () => {
         var rowData = Array.from(selectedRow.cells).map(cell => cell.textContent);
         var index = rowData[0];
         transcribed_texts.splice(index - 1, index);
+        updateTable();
     } else {
         console.log('No row selected.');
     }
