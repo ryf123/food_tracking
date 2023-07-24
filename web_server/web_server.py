@@ -77,6 +77,15 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
             with open('dashboard.html', 'r') as f:
                 self.wfile.write(bytes(f.read(), encoding='utf-8'))
 
+        elif self.path == "/weekly_summary":
+            # Customize the content for the homepage
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+            with open('weekly_summary.html', 'r') as f:
+                self.wfile.write(bytes(f.read(), encoding='utf-8'))
+
+
         elif self.path.startswith("/db_save"):
             print(query_params.get('text', [''])[0])
 
@@ -96,16 +105,17 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             print(calorie_data)
             self.wfile.write(bytes(json.dumps(calorie_data), 'utf-8'))
+
+        elif self.path.startswith("/load_weekly_summary"):
+            self.send_response(200)
+            user_id = query_params.get('user_id', [''])[0]
+            print(f'user id: {user_id}')
+            db_access = DBAccess()
+            calorie_data = db_access.get_weekly_average(user_id)
+            self.send_header('Content-type', 'application/text')  # Add the Content-type header
+            self.end_headers()
+            print(calorie_data)
+            self.wfile.write(bytes(json.dumps(calorie_data), 'utf-8'))
             
         else:
             super().do_GET()
-
-# Create an instance of the HTTP server with the defined port and request handler
-with socketserver.TCPServer(("", PORT), SimpleHandler) as httpd:
-    print(f"Server running on port {PORT}")
-    # Start the server and keep it running until interrupted
-    try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        print("\nServer interrupted. Stopping...")
-        httpd.server_close()

@@ -1,5 +1,4 @@
 from sqlite_db import SQLiteDB
-import ast
 import datetime
 import re
 
@@ -23,6 +22,11 @@ class DBAccess:
         user_id_int = int(re.sub(r"\D", "", user_id.strip()))
         results = self.db.get_items(user_id = user_id_int)
         return [{'date': item[0], 'calorie': item[1]} for item in results]
+
+    def get_weekly_average(self, user_id):
+        user_id_int = int(re.sub(r"\D", "", user_id.strip()))
+        results = self.db.get_weekly_average(user_id = user_id_int)
+        return [{'week': item[0], 'calorie': item[1]} for item in results]
 
     def __del__(self):
         self.db.close()

@@ -39,5 +39,21 @@ class SQLiteDB:
         self.cursor.execute(query)
         return self.cursor.fetchall()
 
+    def get_weekly_average(self, user_id):
+        query = f"""
+        WITH DailyCalories AS (
+            SELECT date, SUM(calories) as daily_calories
+            FROM {self.TABLE_NAME}
+            WHERE user_id = {user_id}
+            GROUP BY date
+        )
+        SELECT strftime('%Y-%W', date) as week, AVG(daily_calories) as avg_calories
+        FROM DailyCalories
+        GROUP BY week
+        ORDER BY week DESC
+        """
+        print(query)
+        return self.cursor.execute(query).fetchall()
+
     def close(self):
         self.conn.close()

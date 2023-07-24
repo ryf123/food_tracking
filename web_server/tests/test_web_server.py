@@ -106,5 +106,55 @@ class TestSimpleHandler(unittest.TestCase):
         handler.send_header.assert_called_with('Content-type', 'text/html')
         handler.end_headers.assert_called_once()
 
+    @patch('web_server.DBAccess')  # mock the DBAccess
+    @patch("builtins.open", new_callable=mock_open, read_data="weekly summary content")
+    def test_do_GET_weekly_summary(self, mock_file, mock_db_access):
+        # Assign necessary attributes to handler object
+        handler = SimpleHandler
+        handler.path = "/weekly_summary"
+        handler.wfile = BytesIO()
+        handler.requestline = ""
+        handler.client_address = ""
+        handler.send_response = MagicMock()
+        handler.send_header = MagicMock()
+        handler.end_headers = MagicMock()
+
+        # Call the do_GET method
+        handler.do_GET(handler)
+
+        # Assert the expected values
+        self.assertEqual(handler.wfile.getvalue(), b'weekly summary content')
+        handler.send_response.assert_called_with(200)
+        handler.send_header.assert_called_with('Content-type', 'text/html')
+        handler.end_headers.assert_called_once()
+
+    @patch('web_server.DBAccess')  # mock the DBAccess
+    @patch("builtins.open", new_callable=mock_open, read_data="load weekly summary data")
+    def test_do_GET_weekly_summary_data(self, mock_file, mock_db_access):
+        # Create an instance of the mock DB_Access
+        mock_db_access_instance = mock_db_access.return_value
+        # Define the return value of transcribe_audio_file method
+        mock_db_access_instance.get_weekly_average.return_value = [{'week': 29, 'calorie': 1310}, {'week': 28, 'calorie': 2000}]
+
+        # Assign necessary attributes to handler object
+        handler = SimpleHandler
+        handler.path = "/load_weekly_summary?user_id=200"
+        handler.wfile = BytesIO()
+        handler.requestline = ""
+        handler.client_address = ""
+        handler.send_response = MagicMock()
+        handler.send_header = MagicMock()
+        handler.end_headers = MagicMock()
+
+        # Call the do_GET method
+        handler.do_GET(handler)
+
+        # Assert the expected values
+        self.assertEqual(handler.wfile.getvalue(), b"""[{"week": 29, "calorie": 1310}, {"week": 28, "calorie": 2000}]""")
+        handler.send_response.assert_called_with(200)
+        handler.send_header.assert_called_with('Content-type', 'application/text')
+        handler.end_headers.assert_called_once()
+
+
 if __name__ == '__main__':
     unittest.main()

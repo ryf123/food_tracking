@@ -51,6 +51,24 @@ class DBAccessTestCase(unittest.TestCase):
         # Assert that the get_items method of the mock database was called with the correct argument
         self.mock_db.get_items.assert_called_once_with(user_id=123)
 
+    def test_get_weekly_average(self):
+         # Mock data
+        user_id = '123'
+
+        # Mock the return value of get_weekly_average() method
+        mock_results = [('29', 1310), ('28', 2000)]
+        self.mock_db.get_weekly_average.return_value = mock_results
+
+        # Call the method to be tested
+        result = self.db_access.get_weekly_average(user_id)
+
+        # Assert the result
+        expected_result = [{'week': '29', 'calorie': 1310}, {'week': '28', 'calorie': 2000}]
+        self.assertEqual(result, expected_result)
+
+        # Assert that the get_weekly_average method of the mock database was called with the correct argument
+        self.mock_db.get_weekly_average.assert_called_once_with(user_id=123)
+
     def tearDown(self):
         # Clean up resources after each test
         self.db_access = None
