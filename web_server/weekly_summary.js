@@ -26,4 +26,22 @@ const loadWeeklySummary = async () => {
     console.error('Error:', error);
   }
 };
+const loadAnalysisData = () => {
+  return fetch('/load_nutrition_analysis?user_id=200')
+    .then(response => response.json())
+    .catch(error => {
+      console.error('Error:', error);
+    });
+};
+
+const loadAnalysis = async () => {
+  try {
+    const data = await loadAnalysisData();
+    var divElement = document.getElementById("analysisResult");
+    divElement.textContent = JSON.parse(JSON.stringify(data))['analysis'];
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
+loadAnalysis();
 loadWeeklySummary();

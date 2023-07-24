@@ -55,5 +55,18 @@ class SQLiteDB:
         print(query)
         return self.cursor.execute(query).fetchall()
 
+    def get_food_records_by_date(self, user_id):
+        query = f"""
+        SELECT
+          date,
+          GROUP_CONCAT(transcribed_text, ', ') AS food_records
+        FROM {self.TABLE_NAME}
+        WHERE user_id = {user_id}
+        GROUP BY
+          date;
+        """
+        print(query)
+        return self.cursor.execute(query).fetchall()
+
     def close(self):
         self.conn.close()

@@ -1,12 +1,10 @@
 import http.server
-import socketserver
 import json
 from db_access import DBAccess
 import re
 import urllib.parse
 from transcribe_service import TranscribeService
 # Define the port number for the server to listen on
-PORT = 8000
 
 # Create a request handler by inheriting from the SimpleHTTPRequestHandler class
 class SimpleHandler(http.server.SimpleHTTPRequestHandler):
@@ -85,7 +83,6 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
             with open('weekly_summary.html', 'r') as f:
                 self.wfile.write(bytes(f.read(), encoding='utf-8'))
 
-
         elif self.path.startswith("/db_save"):
             print(query_params.get('text', [''])[0])
 
@@ -116,6 +113,15 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             print(calorie_data)
             self.wfile.write(bytes(json.dumps(calorie_data), 'utf-8'))
-            
+
+        elif self.path.startswith("/load_nutrition_analysis"):
+            self.send_response(200)
+            user_id = query_params.get('user_id', [''])[0]
+            print(f'user id: {user_id}')
+            ts = TranscribeService()
+            analysis = ts.nutrition_analysis(user_id)
+            self.send_header('Content-type', 'application/text')  # Add the Content-type header
+            self.end_headers()
+            self.wfile.write(bytes(json.dumps(analysis), 'utf-8'))
         else:
             super().do_GET()

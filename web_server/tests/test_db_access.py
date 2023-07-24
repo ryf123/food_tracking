@@ -69,6 +69,25 @@ class DBAccessTestCase(unittest.TestCase):
         # Assert that the get_weekly_average method of the mock database was called with the correct argument
         self.mock_db.get_weekly_average.assert_called_once_with(user_id=123)
 
+    def test_get_food_records_by_date(self):
+         # Mock data
+        user_id = '123'
+
+        # Mock the return value of get_food_records_by_date() method
+        mock_results = [('2023-07-13', 'I ate a cake'), ('2023-07-20', 'I ate two cakes')]
+        self.mock_db.get_food_records_by_date.return_value = mock_results
+
+        # Call the method to be tested
+        result = self.db_access.get_food_records_by_date(user_id)
+
+        # Assert the result
+        expected_result = [{'date': '2023-07-13', 'food_record': 'I ate a cake'}, {'date': '2023-07-20', 'food_record': 'I ate two cakes'}]
+        self.assertEqual(result, expected_result)
+
+        # Assert that the get_food_records_by_date method of the mock database was called with the correct argument
+        self.mock_db.get_food_records_by_date.assert_called_once_with(user_id=123)
+
+
     def tearDown(self):
         # Clean up resources after each test
         self.db_access = None

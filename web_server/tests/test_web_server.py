@@ -62,6 +62,33 @@ class TestSimpleHandler(unittest.TestCase):
         handler.send_header.assert_called_with('Content-type', 'application/json')
         handler.end_headers.assert_called_once()
 
+    @patch('web_server.TranscribeService')  # mock the TranscribeService
+    def test_do_GET_nutrition_analysis(self, mock_transcribe_service):
+        # Create an instance of the mock TranscribeService
+        mock_transcribe_service_instance = mock_transcribe_service.return_value
+        # Define the return value of summarize_calorie_intake method
+        mock_transcribe_service_instance.nutrition_analysis.return_value = {'analysis': 'eat less sugar'}
+
+        # Assign necessary attributes to handler object
+        handler = SimpleHandler
+        handler.path = "/nutrition_analysis?user_id=200"
+        handler.wfile = BytesIO()
+        handler.requestline = ""
+        handler.client_address = ""
+        handler.send_response = MagicMock()
+        handler.send_header = MagicMock()
+        handler.end_headers = MagicMock()
+
+        # Call the do_GET method
+        handler.do_GET(handler)
+
+        # Assert the expected values
+        expected_result = b"""{"analysis": "eat less sugar"}"""
+        self.assertEqual(handler.wfile.getvalue(), expected_result)
+        handler.send_response.assert_called_with(200)
+        handler.send_header.assert_called_with('Content-type', 'application/text')
+        handler.end_headers.assert_called_once()
+
     @patch('web_server.DBAccess')  # mock the DBAccess
     @patch("builtins.open", new_callable=mock_open, read_data="homepage content")
     def test_do_GET_homepage(self, mock_file, mock_db_access):
@@ -133,7 +160,7 @@ class TestSimpleHandler(unittest.TestCase):
     def test_do_GET_weekly_summary_data(self, mock_file, mock_db_access):
         # Create an instance of the mock DB_Access
         mock_db_access_instance = mock_db_access.return_value
-        # Define the return value of transcribe_audio_file method
+        # Define the return value of mock db
         mock_db_access_instance.get_weekly_average.return_value = [{'week': 29, 'calorie': 1310}, {'week': 28, 'calorie': 2000}]
 
         # Assign necessary attributes to handler object

@@ -28,5 +28,10 @@ class DBAccess:
         results = self.db.get_weekly_average(user_id = user_id_int)
         return [{'week': item[0], 'calorie': item[1]} for item in results]
 
+    def get_food_records_by_date(self, user_id):
+        user_id_int = int(re.sub(r"\D", "", user_id.strip()))
+        results = self.db.get_food_records_by_date(user_id = user_id_int)
+        return [{'date': item[0], 'food_record': item[1]} for item in results]
+
     def __del__(self):
         self.db.close()

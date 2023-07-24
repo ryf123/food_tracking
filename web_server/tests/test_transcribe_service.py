@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 from transcribe_service import TranscribeService
 import os
+from db_access import DBAccess
 os.environ['OPENAI_API_KEY'] = 'test_api_key'
 
 class TranscribeServiceTestCase(unittest.TestCase):
@@ -19,6 +20,30 @@ class TranscribeServiceTestCase(unittest.TestCase):
 
             # Call the method under test
             result = self.transcribe_service.summarize_calorie_intake(text)
+
+            # Assert the result
+            self.assertEqual(result, expected_result)
+
+    @patch('web_server.DBAccess')  # mock the DBAccess
+    def test_nutrition_analysis(self, mock_db_access):
+        user_id = '200'
+        db_access = DBAccess()
+        calorie_data = db_access.get_weekly_average(user_id)
+        # Create an instance of the mock DB_Access
+        mock_db_access_instance = mock_db_access.return_value
+        # Define the return value of mock db
+        food_records = [{'date': '2023-07-13', 'food_record': 'I ate a cake'}, {'date': '2023-07-20', 'food_record': 'I ate two cakes'}]
+        mock_db_access_instance.get_food_records_by_date.return_value = food_records
+
+        expected_result = {"analysis": 'eat less sugar'}
+
+        # Mock the SequentialChain and its output
+        with patch('transcribe_service.SequentialChain') as mock_sequential_chain:
+            mock_chain_instance = mock_sequential_chain.return_value
+            mock_chain_instance.return_value = {"analysis": 'eat less sugar'}
+
+            # Call the method under test
+            result = self.transcribe_service.nutrition_analysis(user_id)
 
             # Assert the result
             self.assertEqual(result, expected_result)
