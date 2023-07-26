@@ -71,7 +71,7 @@ class TestSimpleHandler(unittest.TestCase):
 
         # Assign necessary attributes to handler object
         handler = SimpleHandler
-        handler.path = "/nutrition_analysis?user_id=200"
+        handler.path = "/load_nutrition_analysis?user_id=200"
         handler.wfile = BytesIO()
         handler.requestline = ""
         handler.client_address = ""

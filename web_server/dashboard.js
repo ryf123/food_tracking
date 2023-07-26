@@ -1,4 +1,4 @@
-const loadCalorieSummary = () => {
+const loadHistoryData = () => {
   return fetch('/load_history?user_id=200')
     .then(response => response.json())
     .catch(error => {
